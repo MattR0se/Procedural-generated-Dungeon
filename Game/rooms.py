@@ -16,12 +16,12 @@ class Room():
         self.h = st.HEIGHT // st.TILESIZE
      
         self.image = self.game.room_image_dict[self.doors]
-        self.tileRoom()
+        #self.tileRoom()
         
         
     def tileRoom(self):
         # floor tile
-        floor = 8
+        floor = 7
         
         # layout is for objects, tiles for the tileset index
         self.layout = []
@@ -29,15 +29,37 @@ class Room():
         for i in range(self.h):
             self.layout.append([])
             self.tiles.append([])
-            if i == 0 or i == self.h - 1:
+            if i == 0 :
                 for j in range(self.w):
                     self.layout[i].append(1)
-                    self.tiles[i].append(1)
+                    
+                    if j == 0:
+                        self.tiles[i].append(12)
+                    elif j == self.w - 1:
+                        self.tiles[i].append(13)
+                    else:
+                        self.tiles[i].append(28)
+            elif i == self.h - 1:
+                for j in range(self.w):
+                    self.layout[i].append(1)
+                    
+                    if j == 0:
+                        self.tiles[i].append(21)
+                    elif j == self.w - 1:
+                        self.tiles[i].append(22)
+                    else:
+                        self.tiles[i].append(10)
             else:
                 for j in range(self.w):
-                    if j == 0 or j == self.w - 1:
+                    if j == 0:
                         self.layout[i].append(1)
-                        self.tiles[i].append(1)
+                        
+                        self.tiles[i].append(20)
+                        
+                    elif j == self.w - 1:    
+                        self.layout[i].append(1)
+                        
+                        self.tiles[i].append(18)
                     else:
                         self.layout[i].append(0)
                         self.tiles[i].append(floor)
@@ -51,32 +73,40 @@ class Room():
             self.layout[0][door_w] = 0
             self.layout[0][door_w - 1] = 0
             
+            self.tiles[0][door_w + 1] = 27
             self.tiles[0][door_w] = floor
             self.tiles[0][door_w - 1] = floor
+            self.tiles[0][door_w - 2] = 29
         
         # south
         if 'S' in self.doors:
             self.layout[self.h - 1][door_w] = 0
             self.layout[self.h - 1][door_w - 1] = 0
             
+            self.tiles[self.h - 1][door_w + 1] = 9
             self.tiles[self.h - 1][door_w] = floor
             self.tiles[self.h - 1][door_w - 1] = floor
+            self.tiles[self.h - 1][door_w - 2] = 11
         
         # west
         if 'W' in self.doors:
             self.layout[door_h][0] = 0
             self.layout[door_h - 1][0] = 0
             
+            self.tiles[door_h + 1][0] = 11
             self.tiles[door_h][0] = floor
             self.tiles[door_h - 1][0] = floor
+            self.tiles[door_h - 2][0] = 29
         
         # east
         if 'E' in self.doors:
             self.layout[door_h][self.w - 1] = 0
             self.layout[door_h - 1][self.w - 1] = 0
             
+            self.tiles[door_h + 1][self.w - 1] = 9
             self.tiles[door_h][self.w - 1] = floor
             self.tiles[door_h - 1][self.w - 1] = floor
+            self.tiles[door_h - 2][self.w - 1] = 27
         
 
 
@@ -112,55 +142,97 @@ class Dungeon():
         self.rooms[h//2][w//2] = Room(self.game, 'NSWE', 'start')
         self.room_index = [h//2, w//2]
         
+        self.done = False
+        
         self.build()
+        print('done')
+        self.checkDoors()
                 
         
-    def build(self):         
-        cycles = 0
-        while cycles <= st.DUNGEON_SIZE[0] * st.DUNGEON_SIZE[1]:
+    def build(self):  
+        while self.done == False:
+            self.done = True
             for i in range(1, len(self.rooms) - 1):
                 for j in range(1, len(self.rooms[i]) - 1):
                     room = self.rooms[i][j]
                     if room:
                         if 'N' in room.doors and self.rooms[i - 1][j] == None:
                             if i == 1:
-                                self.rooms[i - 1][j] = self.room_pool[3]
+                                self.rooms[i - 1][j] = Room(self.game, 'S')
                             else:
                                 rng = choice(st.ROOMS['N'])
-                                for room in self.room_pool:
-                                    if fn.compare(rng, room.doors):
-                                        self.rooms[i - 1][j] = room
-                                        
+                                for rm in self.room_pool:
+                                    if fn.compare(rng, rm.doors):
+                                        self.rooms[i - 1][j] = rm
+                            self.done = False
+                        
                         if 'W' in room.doors and self.rooms[i][j - 1] == None:
                             if j == 1:
-                                self.rooms[i][j - 1] = self.room_pool[5]
+                                self.rooms[i][j - 1] = Room(self.game, 'E')
                             else:
                                 rng = choice(st.ROOMS['W'])
-                                for room in self.room_pool:
-                                    if fn.compare(rng, room.doors):
-                                        self.rooms[i][j - 1] = room
-                                        
+                                for rm in self.room_pool:
+                                    if fn.compare(rng, rm.doors):
+                                        self.rooms[i][j - 1] = rm
+                            self.done = False
+                        
                         if 'E' in room.doors and self.rooms[i][j + 1] == None:
                             if j == len(self.rooms) - 2:
-                                 self.rooms[i][j + 1] = self.room_pool[4]
+                                 self.rooms[i][j + 1] = Room(self.game, 'W')
                             else:
                                 rng = choice(st.ROOMS['E'])
-                                for room in self.room_pool:
-                                    if fn.compare(rng, room.doors):
-                                        self.rooms[i][j + 1] = room    
-                                        
+                                for rm in self.room_pool:
+                                    if fn.compare(rng, rm.doors):
+                                        self.rooms[i][j + 1] = rm
+                            self.done = False                              
+                        
                         if 'S' in room.doors and self.rooms[i + 1][j] == None:
                             if i == len(self.rooms) - 2:
                                 pass
-                                self.rooms[i + 1][j] = self.room_pool[2]
+                                self.rooms[i + 1][j] = Room(self.game, 'N')
                             else:
                                 rng = choice(st.ROOMS['S'])
-                                for room in self.room_pool:
-                                    if fn.compare(rng, room.doors):
-                                        self.rooms[i + 1][j] = room
-                                        
-            cycles += 1
+                                for rm in self.room_pool:
+                                    if fn.compare(rng, rm.doors):
+                                        self.rooms[i + 1][j] = rm
+                            self.done = False 
   
+    
+    def checkDoors(self):
+        for i in range(1, len(self.rooms) - 1):
+            for j in range(1, len(self.rooms[i]) - 1):
+                room = self.rooms[i][j]
+                room_n = self.rooms[i - 1][j]
+                room_s = self.rooms[i + 1][j]
+                room_w = self.rooms[i][j - 1]
+                room_e = self.rooms[i][j + 1]
+                
+                if room:
+                    print(j, i, room.doors)
+                    for door in room.doors:  
+                        if door == 'N' and room_n:
+                            if 'S' in room_n.doors:
+                                room_n.doors = room_n.doors.replace('S', '')
+                                room.doors = room.doors.replace('N', '')
+                        '''
+                        if door == 'S' and room_s:
+                            if 'N' in room_s.doors:
+                                room_s.doors = room_s.doors.replace('N', '')
+                                room.doors = room.doors.replace('S', '')
+                                
+                        if door == 'E' and room_e:
+                            if 'W' in room_e.doors:
+                                room_e.doors = room_e.doors.replace('E', '')
+                                room.doors = room.doors.replace('W', '')
+                                
+                        if door == 'W' and room_w:
+                            if 'E' in room_w.doors:
+                                room_w.doors = room_w.doors.replace('E', '')
+                                room.doors = room.doors.replace('W', '')'''
+                    print(j, i, room.doors)
+                    room.tileRoom()
+                            
+    
 
     def blitRooms(self):
         # blit a map image onto the screen
