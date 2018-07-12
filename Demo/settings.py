@@ -13,13 +13,13 @@ SFX_VOL = 0.3
 MU_VOL = 0.3
 
 # game properties
-DUNGEON_SIZE = (20, 20)
+DUNGEON_SIZE = (16, 16)
 # animation delay in milliseconds
-DELAY = 200
+DELAY = 10
 
 # possible rooms for picking
 ROOMS = {
-        'N': ['NS', 'NS', 'NS', 'NS', 'S', 'S', 'S', 'WS', 'ES', 'SWE', 'NSW', 'NWE'],
+        'N': ['NS', 'NS', 'NS', 'NS', 'S', 'S', 'S', 'WS', 'ES', 'SWE', 'NSW', 'NSE'],
         'W': ['WE', 'WE', 'WE', 'WE', 'E', 'E', 'E', 'ES', 'EN', 'SWE', 'NSE', 'NWE'],
         'E': ['WE', 'WE', 'WE', 'WE', 'W', 'W', 'W', 'WS', 'WN', 'SWE', 'NSW', 'NWE'],
         'S': ['NS', 'NS', 'NS', 'NS', 'N', 'N', 'N', 'WN', 'EN', 'NSE', 'NSW', 'NWE']

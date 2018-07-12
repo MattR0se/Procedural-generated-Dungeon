@@ -52,6 +52,8 @@ class Game():
         self.dungeon = spr.Dungeon(self, st.DUNGEON_SIZE)
         self.all_sprites.add(self.dungeon)
         
+        self.screen.fill((0, 0, 0))
+        
         self.run()
 
 
@@ -68,7 +70,6 @@ class Game():
     def update(self):
         # game loop update
         self.all_sprites.update()
-        pass
 
 
     def events(self):
@@ -80,7 +81,6 @@ class Game():
                 self.running = False
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_r:
-                    self.screen.fill((0, 0, 0))
                     self.new()
 
 
@@ -88,13 +88,16 @@ class Game():
         
         pg.display.flip()
 
-
-g = Game()
-try:
-    while g.running:
-        g.new()
-except Exception:
-    traceback.print_exc()
+def run():
+    g = Game()
+    try:
+        while g.running:
+            g.new()
+    except Exception:
+        traceback.print_exc()
+        pg.quit()
+    
     pg.quit()
 
-pg.quit()
+if __name__ == '__main__':
+    run()
