@@ -146,7 +146,8 @@ class Dungeon():
         
         self.build()
         print('done')
-        self.checkDoors()
+        # work in progress
+        #self.checkDoors()
                 
         
     def build(self):  
@@ -214,7 +215,6 @@ class Dungeon():
                             if 'S' in room_n.doors:
                                 room_n.doors = room_n.doors.replace('S', '')
                                 room.doors = room.doors.replace('N', '')
-                        '''
                         if door == 'S' and room_s:
                             if 'N' in room_s.doors:
                                 room_s.doors = room_s.doors.replace('N', '')
@@ -228,7 +228,7 @@ class Dungeon():
                         if door == 'W' and room_w:
                             if 'E' in room_w.doors:
                                 room_w.doors = room_w.doors.replace('E', '')
-                                room.doors = room.doors.replace('W', '')'''
+                                room.doors = room.doors.replace('W', '')
                     print(j, i, room.doors)
                     room.tileRoom()
                             
