@@ -55,7 +55,14 @@ class Dungeon(pg.sprite.Sprite):
         self.size = vec(size)
         self.game = game
         self.font_name = pg.font.match_font(st.FONT_NAME)
-           
+          
+        # for animation:
+        self.clock = animationClock()    
+        self.done = False
+        
+        # for debugging
+        self.room_statistics = ''
+        
         self.room_pool = [
                 Room(self.game, 'NS'),  
                 Room(self.game, 'WE'),  
@@ -104,61 +111,64 @@ class Dungeon(pg.sprite.Sprite):
         
         
     def update(self):
-        self.build_cycle()
-        pg.time.delay(st.DELAY)
-        self.blitRooms()
-        
+        if self.clock.checkTime() and not self.done:
+            self.build_cycle()
+            if self.done:
+                print('done')
+        self.blitRooms()    
     
 
     def build_cycle(self):
-        self.rooms_prev = list(self.rooms)
+        self.done = True
         for i in range(1, len(self.rooms) - 1):
-                for j in range(1, len(self.rooms[i]) - 1):
-                    room = self.rooms[i][j]
-                    if room:
-                        if 'N' in room.doors and self.rooms[i - 1][j] == None:
-                            if i == 1:
-                                self.rooms[i - 1][j] = self.room_pool[3]
-                            else:
-                                rng = choice(st.ROOMS['N'])
-                                for room in self.room_pool:
-                                    if compare(rng, room.doors):
-                                        self.rooms[i - 1][j] = room
-                            break
-                            # breaks are just here so that the rooms are drawn 
-                            # one at a time
-                        if 'W' in room.doors and self.rooms[i][j - 1] == None:
-                            if j == 1:
-                                self.rooms[i][j - 1] = self.room_pool[5]
-                            else:
-                                rng = choice(st.ROOMS['W'])
-                                for room in self.room_pool:
-                                    if compare(rng, room.doors):
-                                        self.rooms[i][j - 1] = room
-                            break
-                        
-                        if 'E' in room.doors and self.rooms[i][j + 1] == None:
-                            if j == len(self.rooms) - 2:
-                                 self.rooms[i][j + 1] = self.room_pool[4]
-                            else:
-                                rng = choice(st.ROOMS['E'])
-                                for room in self.room_pool:
-                                    if compare(rng, room.doors):
-                                        self.rooms[i][j + 1] = room                                        
-                            break
-                        
-                        if 'S' in room.doors and self.rooms[i + 1][j] == None:
-                            if i == len(self.rooms) - 2:
-                                pass
-                                self.rooms[i + 1][j] = self.room_pool[2]
-                            else:
-                                rng = choice(st.ROOMS['S'])
-                                for room in self.room_pool:
-                                    if compare(rng, room.doors):
-                                        self.rooms[i + 1][j] = room
-                            break
-                        
-        self.rooms = self.rooms_prev
+            for j in range(1, len(self.rooms[i]) - 1):
+                room = self.rooms[i][j]
+                if room:
+                    if 'N' in room.doors and self.rooms[i - 1][j] == None:
+                        if i == 1:
+                            self.rooms[i - 1][j] = Room(self.game, 'S')
+                        else:
+                            rng = choice(st.ROOMS['N'])
+                            for rm in self.room_pool:
+                                if compare(rng, rm.doors):
+                                    self.rooms[i - 1][j] = rm
+                        # returns are just for animation purpose
+                        self.done = False
+                        return
+                    
+                    if 'W' in room.doors and self.rooms[i][j - 1] == None:
+                        if j == 1:
+                            self.rooms[i][j - 1] = Room(self.game, 'E')
+                        else:
+                            rng = choice(st.ROOMS['W'])
+                            for rm in self.room_pool:
+                                if compare(rng, rm.doors):
+                                    self.rooms[i][j - 1] = rm
+                        self.done = False
+                        return
+                    
+                    if 'E' in room.doors and self.rooms[i][j + 1] == None:
+                        if j == len(self.rooms) - 2:
+                             self.rooms[i][j + 1] = Room(self.game, 'W')
+                        else:
+                            rng = choice(st.ROOMS['E'])
+                            for rm in self.room_pool:
+                                if compare(rng, rm.doors):
+                                    self.rooms[i][j + 1] = rm
+                        self.done = False                              
+                        return
+                    
+                    if 'S' in room.doors and self.rooms[i + 1][j] == None:
+                        if i == len(self.rooms) - 2:
+                            pass
+                            self.rooms[i + 1][j] = Room(self.game, 'N')
+                        else:
+                            rng = choice(st.ROOMS['S'])
+                            for rm in self.room_pool:
+                                if compare(rng, rm.doors):
+                                    self.rooms[i + 1][j] = rm
+                        self.done = False
+                        return  
         
         
     def draw_text(self, text, size, color, pos):
@@ -167,3 +177,17 @@ class Dungeon(pg.sprite.Sprite):
         text_rect = text_surface.get_rect()
         text_rect.midtop = pos
         self.game.screen.blit(text_surface, text_rect)
+        
+        
+        
+class animationClock():
+    def __init__(self):
+        self.current_time = pg.time.get_ticks()
+        self.wait_time = self.current_time + st.DELAY
+    
+    def checkTime(self):
+        self.current_time = pg.time.get_ticks()
+        if self.current_time >= self.wait_time:
+            self.wait_time = self.current_time + st.DELAY
+            return True
+        return False
