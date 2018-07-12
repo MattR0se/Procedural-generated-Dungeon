@@ -37,7 +37,7 @@ def screenWrap(player, dungeon):
     
     new_pos = np.copy(player.rect.topleft)
     if player.rect.right < 0:
-        new_pos[0]  = st.WIDTH
+        new_pos[0]  = st.WIDTH - player.bb_width
         index[1] -= 1
     if player.rect.left > st.WIDTH:
         new_pos[0] = - player.bb_width
