@@ -95,8 +95,6 @@ class Game():
 
     def update(self):
         index = self.dungeon.room_index
-        pg.display.set_caption(str(index) + ' ' + str(
-                                self.dungeon.rooms[index[0]][index[1]].doors))
         
         # game loop update
         self.player.update(self.walls)
