@@ -43,7 +43,7 @@ for key in self.game.room_image_dict:
 
 This looks complicated, but what the compare() method does is compare two strings regardless of the order of their letters. For example, compare('NWS', 'SWN') would return True. This way I don't have to worry about the order of the doors string. 
 
-The Room has one method called 'tileRoom()'. Here, the layout (which stores information where the sprites are beinig placed) is created as a two-dimensional array (because this is python, 'list of lists' would be more precise, but I hope you get the idea. Right now, the first and last column are all 1s, which stand for wall tiles, and the floor are 0s. Notice that the outer loop is for the columns and the inner loop is for the rows, which is something I always confuse and it is a point where errors happen frequently, especially if you want to combine this with (x, y) coordinates and vectors, where it is the other way round...
+The Room has one method called 'tileRoom()'. Here, the layout (which stores information where the sprites are beinig placed) is created as a two-dimensional array (because this is python, 'list of lists' would be more precise, but I hope you get the idea. Right now, the first and last column are all 1s, which stand for wall tiles, and the floor are 0s. Notice that the outer loop is for the columns and the inner loop is for the rows, which is something I always confuse and it is a point where errors happen frequently, especially if you combine this with (x, y) coordinates and vectors, where it is the other way round...
 ```python
 self.layout = []
 for i in range(self.h):
@@ -69,7 +69,7 @@ In the final code, there is also a grid for the tile data, but since this depend
 
 After the walls, the doors are put into the room's grid. I look for the 4 letters that represent the directions and if they are in the room's doors variable, a door is put in that particular spot, which here are just two 0s that determine that np wall should be placed there. 
 ```python
- # north
+# north
 if 'N' in self.doors:
     self.layout[0][door_w] = 0
     self.layout[0][door_w - 1] = 0
@@ -125,19 +125,100 @@ class Dungeon():
         self.room_map = [[(j * w + i) for i in range(w)] for j in range(h)]
 ```
 Then, the starting room is created. In this example, it is a room with 4 exits and located in the middle of the grid, but it could also have any given position and number of exists. I believe this is how it's done in The Binding of Isaac, whereas in Zelda, the entrance would be at the bottom of the dungeon's grid.
-
+```python
+# starting room
+self.rooms[h//2][w//2] = Room(self.game, 'NSWE', 'start')
+self.room_index = [h//2, w//2]
+```
 There is also the 'room_index', which is probably redundant since it stores the same information as the room_map's contents.
 
-Finally, 'build()' is called. Now, you could call this function from the Game() object instead if you wanted to instantiate the Dungeon only once but build a different maze multiple times. for example if you wanted to keep certain attributes the same, but randomize every time the player enters the dungeon. That's pretty much up to you.
+Finally, 'build()' is called. Now, you could call this function from the Game() object instead if you wanted to instantiate the Dungeon only once but build a different maze multiple times. For example if you wanted to keep certain attributes the same, but randomize every time the player enters the dungeon. That's pretty much up to you.
+self.done is just a boolean that checks if no room was placed during a loop, and if so, stays True. That's how I know the dungeon is finished.
+```python
+self.done = False
+        
+self.build()
+```
+Now, the build method is where the magic happens, so to speak. There is a while loop that goes through the rooms grid and checks for every room's doors and if there is empty space and if so, places a random room.
+```python
+def build(self):  
+    while self.done == False:
+        self.done = True
+        for i in range(1, len(self.rooms) - 1):
+            for j in range(1, len(self.rooms[i]) - 1):
+                room = self.rooms[i][j]
+                if room:
+                    if 'N' in room.doors and self.rooms[i - 1][j] == None:
+                        if i == 1:
+                            self.rooms[i - 1][j] = Room(self.game, 'S')
+                        else:
+                            rng = choice(st.ROOMS['N'])
+                            for rm in self.room_pool:
+                                if fn.compare(rng, rm.doors):
+                                    self.rooms[i - 1][j] = rm
+                        self.done = False
 
-Now, the build method is where the magic happens, so to speak. There is a while loop that goes through the rooms grid and checks for every room's doors and if there is empty space. Right now, this loops (height * width) times because this is the maximum number of rooms that could be placed. But in reality, this number is smaller because multiple rooms are being placed at the same time.I could have been more thoughtful about this and I will probably have to change it when performance becomes an issue. For example, I could give the rooms with only one door a 'dead end' attribute and check them only if they don't have it, and when no room was created, the loop exits.
+                    if 'W' in room.doors and self.rooms[i][j - 1] == None:
+                        if j == 1:
+                            self.rooms[i][j - 1] = Room(self.game, 'E')
+                        else:
+                            rng = choice(st.ROOMS['W'])
+                            for rm in self.room_pool:
+                                if fn.compare(rng, rm.doors):
+                                    self.rooms[i][j - 1] = rm
+                        self.done = False
 
-A little bit more in-depth: The code loops through each item in the rooms grid. Remember that there are only 'None's in the beginning, except for the starting room. So if the loop reaches this room, the 'if room:' is True because 'None' defaults to False.
+                    if 'E' in room.doors and self.rooms[i][j + 1] == None:
+                        if j == len(self.rooms) - 2:
+                             self.rooms[i][j + 1] = Room(self.game, 'W')
+                        else:
+                            rng = choice(st.ROOMS['E'])
+                            for rm in self.room_pool:
+                                if fn.compare(rng, rm.doors):
+                                    self.rooms[i][j + 1] = rm
+                        self.done = False                              
 
+                    if 'S' in room.doors and self.rooms[i + 1][j] == None:
+                        if i == len(self.rooms) - 2:
+                            pass
+                            self.rooms[i + 1][j] = Room(self.game, 'N')
+                        else:
+                            rng = choice(st.ROOMS['S'])
+                            for rm in self.room_pool:
+                                if fn.compare(rng, rm.doors):
+                                    self.rooms[i + 1][j] = rm
+                        self.done = False
+```
+A little bit more in-depth: The code loops through each item in the rooms grid, except for the first and last rows and columns. Remember that there are only 'None's in the beginning, except for the starting room. So if the loop reaches this room, the 'if room:' is True because 'None' defaults to False.
+```python
+while self.done == False:
+    self.done = True
+    for i in range(1, len(self.rooms) - 1):
+        for j in range(1, len(self.rooms[i]) - 1):
+            room = self.rooms[i][j]
+            if room: # if room is not None
+```
 Now, there are a bunch of if-clauses that check if that room.doors has a certain direction in it and also if there is a room next to it in that direction. For example, if room.doors has 'N' in it, it has to check north of that room. That would be rooms[i-1][j] because remember, the vertical component comes first in the grid (Imagine this as rooms[y][x]). If there is no room, there are two options: If i == 1, it means that the next room would be placed at the border, so no room with an 'N' door should be placed there. For this example, I chose only to place the 'S' room, but other possible rooms would be 'SE', 'SW' and 'SWE'.
-
-Otherwise, it the Dungeon picks a room constellation randomly from a list. Now, this is the important part that defines the overall structure of your final dungeon. See that currently, for the 'N' direction there are three items 'NS' in it, two 'S' and one of each of the other possible choices. So, it is twice as likely to pick the 'NS' than any other door constellation. So, here you can play with the list and see what happens. For example, if you put one more 'NS' room in there, the branches become more streched. If you have only one 'NS' in there, the rooms will somewhat clump together.
-
+```python
+if 'N' in room.doors and self.rooms[i - 1][j] == None:
+    if i == 1:
+        self.rooms[i - 1][j] = Room(self.game, 'S')
+    else:
+        rng = choice(st.ROOMS['N'])
+        for rm in self.room_pool:
+            if fn.compare(rng, rm.doors):
+                self.rooms[i - 1][j] = rm
+    self.done = False
+```
+Otherwise, it the Dungeon picks a room constellation randomly from a list. Now, this is the important part that defines the overall structure of your final dungeon. See that currently, for the 'N' direction there are four items 'NS' in it, three 'S' and one of each of the other possible choices. So, it is four times as likely to pick the 'NS' and three times as likely to pick 'S' than the other constellations. Here you can play with the list and see what happens. For example, if you put even more 'NS' room in there, the branches become more streched. If you have only one 'NS' in there, the rooms will somewhat clump together. If you add more 'S', the dungeon gets smaller. This is determined in the settings.py:
+```python
+ROOMS = {
+        'N': ['NS', 'NS', 'NS', 'NS', 'S', 'S', 'S', 'WS', 'ES', 'SWE', 'NSW', 'NSE'],
+        'W': ['WE', 'WE', 'WE', 'WE', 'E', 'E', 'E', 'ES', 'EN', 'SWE', 'NSE', 'NWE'],
+        'E': ['WE', 'WE', 'WE', 'WE', 'W', 'W', 'W', 'WS', 'WN', 'SWE', 'NSW', 'NWE'],
+        'S': ['NS', 'NS', 'NS', 'NS', 'N', 'N', 'N', 'WN', 'EN', 'NSE', 'NSW', 'NWE']
+        }
+```
 This is done for all 4 directions. You could also make totally different room_pools for each direction, if you want the dungeon to branch out more to one direction, for example. This is really up to you.
 
 The second method blitRooms() is just a visual representation of the generated dungeon and serves as a mini map. If you want to know more about that, leave a comment.
