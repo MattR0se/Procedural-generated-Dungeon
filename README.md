@@ -222,13 +222,124 @@ ROOMS = {
 This is done for all 4 directions. You could also make totally different room_pools for each direction, if you want the dungeon to branch out more to one direction, for example. This is really up to you.
 
 The second method blitRooms() is just a visual representation of the generated dungeon and serves as a mini map. If you want to know more about that, leave a comment.
+```python
+def blitRooms(self):
+    # blit a map image onto the screen
+    scale = (3 * st.GLOBAL_SCALE, 3 * st.GLOBAL_SCALE)
 
+    w = self.size[0] * scale[0]
+    h = self.size[1] * scale[1]
+
+    self.map_img = pg.Surface((w, h))
+
+    for i in range(len(self.rooms)):
+        for j in range(len(self.rooms[i])):
+            room = self.rooms[i][j]
+            pos = (j * (w / self.size[0]), i * (h / self.size[1]))
+            if room:
+                self.map_img.blit(pg.transform.scale(room.image,
+                                  scale), pos)
+                if room.type == 'start':
+                    # blue square representing the starting room
+                    self.map_img.blit(pg.transform.scale(
+                            self.game.room_images[12], scale), pos)
+            else:
+                self.map_img.blit(pg.transform.scale(
+                        self.game.room_images[17], scale), pos)
+
+    pos2 = (self.room_index[1] * (w / self.size[0]), 
+                           self.room_index[0] * (h / self.size[1]))
+    # red square representing the player
+    self.map_img.blit(pg.transform.scale(self.game.room_images[11], scale), 
+                                         pos2)
+    self.map_img.set_alpha(150)
+    self.game.screen.blit(self.map_img, (0, 0))
+```
 I also won't go much into detail about the sprites.py, functions.py and settings.py. In sprites, there are just the player and the wall sprite and all the player does is move and check for collisions with the wall sprite. Aside from the collision, functions also contains the room transition (which is a mess tbh) and some methods for loading images and make a background out of a tileset. Again, feel free to ask about them in the comments.
 
 The settings contain some variables regarding the screen and tile size. I made it so that you can change the GLOBAL_SCALE variable and everything in the game keeps its proportions.
 
-Alright, so it all comes together in the main.py (as you would probably expect). First, I load all the images for the rooms (which are used for the mini map) and different tilesets that have a similar layout, but different color, from which the game picks a random one. In new(), the Dungeon, the background and the sprites are put into the game. The transitioning between rooms happens in the update() method (and it should probably be its own method for clarity reasons). Again, the system with room numbers and room index is too convoluted and I have to clean it up, but it works for now.
+Alright, so it all comes together in the main.py (as you would probably expect). First, I load all the images for the rooms (which are used for the mini map) and different tilesets that have a similar layout, but different color, from which the game picks a random one. 
+```python
+def load_data(self):
+    game_folder = path.dirname(__file__)
+    img_folder = path.join(game_folder, 'images')
 
+    self.room_images = fn.img_list_from_strip(path.join(img_folder, 
+                                                        'rooms_strip_2.png'), 
+                                              16, 16, 0, 18)
+    self.room_image_dict = {
+            'NSWE': self.room_images[0],
+            'NS': self.room_images[1],
+            'WE': self.room_images[2],
+            'N': self.room_images[3],
+            'S': self.room_images[4],
+            'W': self.room_images[5],
+            'E': self.room_images[6],
+            'SW': self.room_images[7],
+            'SE': self.room_images[8],
+            'NE': self.room_images[9],
+            'NW': self.room_images[10],
+            'NWE': self.room_images[13],
+            'SWE': self.room_images[14],
+            'NSE': self.room_images[15],
+            'NSW': self.room_images[16]
+            }
+
+    self.tileset_names = ['tileset.png', 'tileset_sand.png', 
+                          'tileset_green.png','tileset_red.png']
+
+    self.tileset_list = [fn.tileImageScale(path.join(img_folder, 
+                         tileset), 16, 16, 
+                         scale=1) for tileset in self.tileset_names]
+```
+In new(), the Dungeon, the background and the sprites are put into the game. 
+```python
+def new(self):
+    # start a new game
+    # initialise sprite groups
+    self.all_sprites = pg.sprite.LayeredUpdates()
+    self.walls = pg.sprite.Group()
+
+    # instantiate objects
+    self.dungeon = rooms.Dungeon(self, st.DUNGEON_SIZE)
+    self.room_number = self.dungeon.room_map[self.dungeon.room_index[0]][
+                                             self.dungeon.room_index[1]]
+
+    # pick a random tileset from all available tilesets
+    self.tileset = choice(self.tileset_list)
+    # create a background image from the tileset for the current room
+    self.background = fn.tileRoom(self, self.tileset, self.dungeon.room_index)
+
+    # spawn the player in the middle of the screen/room
+    self.player = spr.Player(self, (st.WIDTH // 2 - st.TILESIZE /2, 
+                                    st.HEIGHT // 2 - st.TILESIZE / 2))
+    # spawn the wall objects (invisible)
+    self.walls = fn.transitRoom(self, self.walls, self.dungeon, 
+                                self.room_number)
+
+    self.run()
+```
+The transitioning between rooms happens in the update() method (and it should probably be its own method for clarity reasons). Again, the system with room numbers and room index is too convoluted and I have to clean it up, but it works for now.
+```python
+def update(self):
+    index = self.dungeon.room_index
+
+    # game loop update
+    # update the player (move and check for collisions with walls)
+    self.player.update(self.walls)
+    
+    # check for room transitions on screen exit (every frame)
+    new_room, new_pos = fn.screenWrap(self.player, self.dungeon)
+    if new_room != self.room_number: 
+        self.room_number = new_room
+        # build the new room
+        fn.tileRoom(self, self.tileset, self.dungeon.room_index)
+        self.background = fn.tileRoom(self, self.tileset, self.dungeon.room_index)
+        self.walls = fn.transitRoom(self, self.walls, 
+                                    self.dungeon, self.room_number)
+        self.player.rect.topleft = new_pos
+```
 So, feel free to play the game if you want. You can restart the game with the R key to get a fresh dungeon.
 
 You can also change some variables in the settings.py (and try to crash the game, if you want ;) )
