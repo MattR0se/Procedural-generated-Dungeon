@@ -41,12 +41,89 @@ for key in self.game.room_image_dict:
         self.image = self.game.room_image_dict[key]
 ```
 
-This looks complicated, but what the compare() method does is compare two strings regardless of the order of their letters. For example, compare('NWS', 'SWN') would return True. This way I don't have to worry about the order of the doors string. The Room has one method called 'tileRoom()'. Here, both the layout for the objects and the tiles are created as two-dimensional arrays (because this is python, 'list of lists' would be more precise, but I hope you get the idea. Right now, the first and last column are all 1s, which stand for wall tiles, and the floor are 0s. Notice that the outer loop is for the columns and the inner loop is for the rows, which is something I always confuse and it is a point where errors happen frequently, especially if you want to combine this with (x, y) coordinates and vectors, where it is the other way round...
+This looks complicated, but what the compare() method does is compare two strings regardless of the order of their letters. For example, compare('NWS', 'SWN') would return True. This way I don't have to worry about the order of the doors string. 
 
-After the walls, the doors are put into the room's grid. I look for the 4 letters that represent the directions and if they are in the room's doors variable, a door is put in that particular spot. And that's it for now with the Room object.
+The Room has one method called 'tileRoom()'. Here, the layout (which stores information where the sprites are beinig placed) is created as a two-dimensional array (because this is python, 'list of lists' would be more precise, but I hope you get the idea. Right now, the first and last column are all 1s, which stand for wall tiles, and the floor are 0s. Notice that the outer loop is for the columns and the inner loop is for the rows, which is something I always confuse and it is a point where errors happen frequently, especially if you want to combine this with (x, y) coordinates and vectors, where it is the other way round...
+```python
+self.layout = []
+for i in range(self.h):
+    self.layout.append([])
+    if i == 0 :
+        for j in range(self.w):
+            self.layout[i].append(1)
+        elif i == self.h - 1:
+            for j in range(self.w):
+                self.layout[i].append(1)           
+        else:
+            for j in range(self.w):
+                if j == 0:
+                    self.layout[i].append(1)
+                elif j == self.w - 1:    
+                    self.layout[i].append(1)
+                else:
+                    # in the room
+                        self.layout[i].append(0) 
+```
+
+In the final code, there is also a grid for the tile data, but since this depends on the final game and how your rooms should look like, I left this out for clarity reasons.
+
+After the walls, the doors are put into the room's grid. I look for the 4 letters that represent the directions and if they are in the room's doors variable, a door is put in that particular spot, which here are just two 0s that determine that np wall should be placed there. 
+```python
+ # north
+if 'N' in self.doors:
+    self.layout[0][door_w] = 0
+    self.layout[0][door_w - 1] = 0
+    
+# south
+if 'S' in self.doors:
+    self.layout[self.h - 1][door_w] = 0
+    self.layout[self.h - 1][door_w - 1] = 0
+
+# west
+if 'W' in self.doors:
+    self.layout[door_h][0] = 0
+    self.layout[door_h - 1][0] = 0
+
+# east
+if 'E' in self.doors:
+    self.layout[door_h][self.w - 1] = 0
+    self.layout[door_h - 1][self.w - 1] = 0
+```
+And that's it for now with the Room object.
+
+## The Dungeon
 
 As for the Dungeon object, it it initialized with a size (that restrains how big your Dungeon can possibly be and what shape it has), a room pool (every possible room object), a 'rooms' that is again a 2D grid for the rooms, initially with only 'None' in it, and a 'room_map' that stores an unique ID for every room. Now, this is probably not needed after I refactored the code, but for now it is necessary to check if there is a room transition and what the next room is after that.
-
+```python
+class Dungeon():
+    def __init__(self, game, size):
+        self.size = vec(size)
+        self.game = game
+           
+        self.room_pool = [
+                Room(self.game, 'NS'),  
+                Room(self.game, 'WE'),  
+                Room(self.game, 'N'),
+                Room(self.game, 'S'),
+                Room(self.game, 'W'),
+                Room(self.game, 'E'),
+                Room(self.game, 'SW'),
+                Room(self.game, 'SE'),
+                Room(self.game, 'NE'),
+                Room(self.game, 'NW'),
+                Room(self.game, 'NSWE'),
+                Room(self.game, 'NWE'),
+                Room(self.game, 'SWE'),
+                Room(self.game, 'NSW'),
+                Room(self.game, 'NSE')
+                ]
+        
+        w = int(self.size.x)
+        h = int(self.size.y)
+        # empty dungeon
+        self.rooms = [[None for i in range(w)] for j in range(h)]
+        self.room_map = [[(j * w + i) for i in range(w)] for j in range(h)]
+```
 Then, the starting room is created. In this example, it is a room with 4 exits and located in the middle of the grid, but it could also have any given position and number of exists. I believe this is how it's done in The Binding of Isaac, whereas in Zelda, the entrance would be at the bottom of the dungeon's grid.
 
 There is also the 'room_index', which is probably redundant since it stores the same information as the room_map's contents.
