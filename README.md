@@ -20,9 +20,28 @@ Since the code is pretty huge by now, and my in-code comments are probably not t
 
 I started with the Room and Dungeon classes, which are in the rooms.py file. A Dungeon is pretty much a collection of rooms. It stores their position and their other attributs (doors, type). The Dungeon is what is randomized every time at the beginning of the game (this is, when you call the build() method). The Room objects themselves are containers for the layout (objects, tiles) of each room. Currently, this is just the data where the doors are, and everything else is the same, but I will add more variety in the future.
 
-Every Room is initialized with a string called 'doors', which is any combination of 'NSWE', the 4 cardinal directions. It also has a type, but at this point there are only 'default' and 'start', but I could see adding 'boss', 'merchant' and the likes.
+## The Room
 
-The Room has one method called 'tileRoom()'. Here, both the layout for the objects and the tiles are created as two-dimensional arrays (because this is python, 'list of lists' would be more precise, but I hope you get the idea. Right now, the first and last column are all 1s, which stand for wall tiles, and the floor are 0s. Notice that the outer loop is for the columns and the inner loop is for the rows, which is something I always confuse and it is a point where errors happen frequently, especially if you want to combine this with (x, y) coordinates and vectors, where it is the other way round...
+Every Room is initialized with a string called 'doors', which is any combination of 'NSWE', the 4 cardinal directions. It also has a type, but at this point there are only 'default' and 'start', but I could see adding 'boss', 'merchant' and the likes.
+```python
+class Room():
+    def __init__(self, game, doors, type_='default'):
+        self.game = game
+        self.doors = doors
+        self.type = type_
+        self.w = st.WIDTH // st.TILESIZE
+        self.h = st.HEIGHT // st.TILESIZE
+```
+
+After that, I set the room's image. Right now, this is only used for a mini map in the corner of the screen.
+
+```python
+for key in self.game.room_image_dict:
+    if fn.compare(self.doors, key):
+        self.image = self.game.room_image_dict[key]
+```
+
+This looks complicated, but what the compare() method does is compare two strings regardless of the order of their letters. For example, compare('NWS', 'SWN') would return True. This way I don't have to worry about the order of the doors string. The Room has one method called 'tileRoom()'. Here, both the layout for the objects and the tiles are created as two-dimensional arrays (because this is python, 'list of lists' would be more precise, but I hope you get the idea. Right now, the first and last column are all 1s, which stand for wall tiles, and the floor are 0s. Notice that the outer loop is for the columns and the inner loop is for the rows, which is something I always confuse and it is a point where errors happen frequently, especially if you want to combine this with (x, y) coordinates and vectors, where it is the other way round...
 
 After the walls, the doors are put into the room's grid. I look for the 4 letters that represent the directions and if they are in the room's doors variable, a door is put in that particular spot. And that's it for now with the Room object.
 
