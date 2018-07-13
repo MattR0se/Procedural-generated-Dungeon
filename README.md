@@ -20,7 +20,7 @@ Since the code is pretty huge by now, and my in-code comments are probably not t
 
 I started with the Room and Dungeon classes, which are in the rooms.py file. A Dungeon is pretty much a collection of rooms. It stores their position and their other attributs (doors, type). The Dungeon is what is randomized every time at the beginning of the game (this is, when you call the build() method). The Room objects themselves are containers for the layout (objects, tiles) of each room. Currently, this is just the data where the doors are, and everything else is the same, but I will add more variety in the future.
 
-## The Room
+### The Room
 
 Every Room is initialized with a string called 'doors', which is any combination of 'NSWE', the 4 cardinal directions. It also has a type, but at this point there are only 'default' and 'start', but I could see adding 'boss', 'merchant' and the likes.
 ```python
@@ -91,7 +91,7 @@ if 'E' in self.doors:
 ```
 And that's it for now with the Room object.
 
-## The Dungeon
+### The Dungeon
 
 As for the Dungeon object, it it initialized with a size (that restrains how big your Dungeon can possibly be and what shape it has), a room pool (every possible room object), a 'rooms' that is again a 2D grid for the rooms, initially with only 'None' in it, and a 'room_map' that stores an unique ID for every room. Now, this is probably not needed after I refactored the code, but for now it is necessary to check if there is a room transition and what the next room is after that.
 ```python
@@ -258,6 +258,8 @@ def blitRooms(self):
 I also won't go much into detail about the sprites.py, functions.py and settings.py. In sprites, there are just the player and the wall sprite and all the player does is move and check for collisions with the wall sprite. Aside from the collision, functions also contains the room transition (which is a mess tbh) and some methods for loading images and make a background out of a tileset. Again, feel free to ask about them in the comments.
 
 The settings contain some variables regarding the screen and tile size. I made it so that you can change the GLOBAL_SCALE variable and everything in the game keeps its proportions.
+
+### The Game
 
 Alright, so it all comes together in the main.py (as you would probably expect). First, I load all the images for the rooms (which are used for the mini map) and different tilesets that have a similar layout, but different color, from which the game picks a random one. 
 ```python
