@@ -2,7 +2,7 @@
 
 This is my first attempt to write an algorithm for a procedural generated dungeon. Now, procedural in this context just means "random with rules", and the rules are not nearly as sophisticated in a game like Minecraft or Terraria, for example.
 
-My goal was to put some even-sized rooms into a fixed 2D grid, and they should all be connected to each other. I put this code together in roughly a week, and build it on top of an older game "engine" of mine, so some things are super convoluted and need to be refactored at some point, but this was only done to test if the algorithm translates to an actual game.
+My goal was to put some evenly sized rooms into a fixed 2D grid, and they should all be connected to each other. I put this code together in roughly a week, and build it on top of an older game "engine" of mine, so some things are super convoluted and need to be refactored at some point, but this was only done to test if the algorithm translates to an actual game.
 
 I made two videos to show how this code looks right now. The first is a visualisation of the actual dungeon generation, the second one is the rudimentary "game" that puts some crudely drawn tiles in each room and lets you (the blue square) traverse the dungeon. Oh, and it also has a mini map, which is pretty much the same as the first example, only scaled to be in the corner of the screen.
 
