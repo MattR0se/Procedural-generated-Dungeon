@@ -34,22 +34,26 @@ def screenWrap(player, dungeon):
     #checks if the player goes outside the screen
     #if they do, set their new position based on where they went
     index = dungeon.room_index
-    
+    direction = ''
     new_pos = np.copy(player.rect.topleft)
     if player.rect.right < 0:
+        direction = 'LEFT'
         new_pos[0]  = st.WIDTH - player.bb_width
         index[1] -= 1
     if player.rect.left > st.WIDTH:
-        new_pos[0] = - player.bb_width
+        direction = 'RIGHT'
+        new_pos[0] = 0
         index[1] += 1
     if player.rect.bottom < 0:
-        new_pos[1] = st.HEIGHT
+        direction = 'UP'
+        new_pos[1] = st.HEIGHT - player.bb_height
         index[0] -= 1
     if player.rect.top > st.HEIGHT:
-        new_pos[1] = - player.bb_height 
+        direction = 'DOWN'
+        new_pos[1] = 0
         index[0] += 1
     try:
-        return dungeon.room_map[index[0]][index[1]], new_pos
+        return direction, dungeon.room_map[index[0]][index[1]], new_pos
     except Exception:
         traceback.print_exc()
         #if there is no matching room, return some default value

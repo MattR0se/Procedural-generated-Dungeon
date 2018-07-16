@@ -1,5 +1,5 @@
 import pygame as pg
-from random import choice
+from random import choice, randint
 
 import settings as st
 import functions as fn
@@ -14,14 +14,24 @@ class Room():
         self.type = type_
         self.w = st.WIDTH // st.TILESIZE
         self.h = st.HEIGHT // st.TILESIZE
-     
-        self.image = self.game.room_image_dict[self.doors]
-        #self.tileRoom()
+        
+        for key in self.game.room_image_dict:
+            if fn.compare(self.doors, key):
+                self.image = self.game.room_image_dict[key]
+        #self.image = self.game.room_image_dict[self.doors]
+        
+        self.tileRoom()
         
         
     def tileRoom(self):
-        # floor tile
-        floor = 7
+        
+        for key in self.game.room_image_dict:
+            if fn.compare(self.doors, key):
+                self.image = self.game.room_image_dict[key]
+        
+        # positions of the doors
+        door_w = self.w // 2
+        door_h = self.h // 2
         
         # layout is for objects, tiles for the tileset index
         self.layout = []
@@ -62,51 +72,62 @@ class Room():
                         self.tiles[i].append(18)
                     else:
                         self.layout[i].append(0)
-                        self.tiles[i].append(floor)
-        
-        # doors
-        door_w = self.w // 2
-        door_h = self.h // 2
-        
+                        self.tiles[i].append(0)
+                    
+        #self.buildInterior()
+       
         # north
         if 'N' in self.doors:
             self.layout[0][door_w] = 0
-            self.layout[0][door_w - 1] = 0
+            # 35, 34, 33
+            self.tiles[0][door_w + 1] = 35
+            self.tiles[0][door_w] = 34
+            self.tiles[0][door_w - 1] = 33
             
-            self.tiles[0][door_w + 1] = 27
-            self.tiles[0][door_w] = floor
-            self.tiles[0][door_w - 1] = floor
-            self.tiles[0][door_w - 2] = 29
-        
         # south
         if 'S' in self.doors:
             self.layout[self.h - 1][door_w] = 0
-            self.layout[self.h - 1][door_w - 1] = 0
             
-            self.tiles[self.h - 1][door_w + 1] = 9
-            self.tiles[self.h - 1][door_w] = floor
-            self.tiles[self.h - 1][door_w - 1] = floor
-            self.tiles[self.h - 1][door_w - 2] = 11
+            self.tiles[self.h - 1][door_w + 1] = 32
+            self.tiles[self.h - 1][door_w] = 31
+            self.tiles[self.h - 1][door_w - 1] = 30
         
         # west
         if 'W' in self.doors:
             self.layout[door_h][0] = 0
-            self.layout[door_h - 1][0] = 0
             
-            self.tiles[door_h + 1][0] = 11
-            self.tiles[door_h][0] = floor
-            self.tiles[door_h - 1][0] = floor
-            self.tiles[door_h - 2][0] = 29
+            self.tiles[door_h + 1][0] = 24
+            self.tiles[door_h][0] = 15
+            self.tiles[door_h - 1][0] = 6
         
         # east
         if 'E' in self.doors:
             self.layout[door_h][self.w - 1] = 0
-            self.layout[door_h - 1][self.w - 1] = 0
             
-            self.tiles[door_h + 1][self.w - 1] = 9
-            self.tiles[door_h][self.w - 1] = floor
-            self.tiles[door_h - 1][self.w - 1] = floor
-            self.tiles[door_h - 2][self.w - 1] = 27
+            self.tiles[door_h + 1][self.w - 1] = 23
+            self.tiles[door_h][self.w - 1] = 14
+            self.tiles[door_h - 1][self.w - 1] = 5
+        
+        
+    def buildInterior(self):
+        # in the room
+        w = self.w - 1
+        h = self.h - 1
+        
+        door_w = self.w // 2
+        door_h = self.h // 2
+        # floor tile index
+        floor = 40
+        for i in range(1, h):
+            for j in range(1, w):
+                if randint(0, 100) <= 10 and (
+                        i != door_h and j != door_w): 
+                    self.layout[i][j] = 1    
+                    self.tiles[i][j] = 1
+                else:
+                    self.layout[i][j] = 0  
+                    self.tiles[i][j] = floor
+
         
 
 
@@ -114,25 +135,7 @@ class Dungeon():
     def __init__(self, game, size):
         self.size = vec(size)
         self.game = game
-           
-        self.room_pool = [
-                Room(self.game, 'NS'),  
-                Room(self.game, 'WE'),  
-                Room(self.game, 'N'),
-                Room(self.game, 'S'),
-                Room(self.game, 'W'),
-                Room(self.game, 'E'),
-                Room(self.game, 'SW'),
-                Room(self.game, 'SE'),
-                Room(self.game, 'NE'),
-                Room(self.game, 'NW'),
-                Room(self.game, 'NSWE'),
-                Room(self.game, 'NWE'),
-                Room(self.game, 'SWE'),
-                Room(self.game, 'NSW'),
-                Room(self.game, 'NSE')
-                ]
-        
+                  
         w = int(self.size.x)
         h = int(self.size.y)
         # empty dungeon
@@ -146,9 +149,8 @@ class Dungeon():
         
         self.build()
         print('done')
-        # work in progress
         #self.checkDoors()
-                
+        
         
     def build(self):  
         while self.done == False:
@@ -161,10 +163,20 @@ class Dungeon():
                             if i == 1:
                                 self.rooms[i - 1][j] = Room(self.game, 'S')
                             else:
+                                # pick random door constellation
                                 rng = choice(st.ROOMS['N'])
-                                for rm in self.room_pool:
-                                    if fn.compare(rng, rm.doors):
-                                        self.rooms[i - 1][j] = rm
+                                
+                                # prevent one-sided doors
+                                # WORK IN PROGRESS
+                                if 'N' in rng and self.rooms[i - 2][j]:
+                                    rng = rng.replace('N', '')
+                                if 'W' in rng and self.rooms[i - 1][j - 1]:
+                                    rng = rng.replace('W', '')
+                                if 'E' in rng and self.rooms[i - 1][j + 1]: 
+                                    rng = rng.replace('E', '')
+      
+                                self.rooms[i - 1][j] = Room(self.game, rng)
+                                
                             self.done = False
                         
                         if 'W' in room.doors and self.rooms[i][j - 1] == None:
@@ -172,9 +184,16 @@ class Dungeon():
                                 self.rooms[i][j - 1] = Room(self.game, 'E')
                             else:
                                 rng = choice(st.ROOMS['W'])
-                                for rm in self.room_pool:
-                                    if fn.compare(rng, rm.doors):
-                                        self.rooms[i][j - 1] = rm
+                                
+                                if 'N' in rng and self.rooms[i - 1][j - 1]:
+                                    rng = rng.replace('N', '')
+                                if 'W' in rng and self.rooms[i][j - 2]: 
+                                    rng = rng.replace('W', '')
+                                if 'S' in rng and self.rooms[i + 1][j - 1]: 
+                                    rng = rng.replace('S', '')
+                                
+                                self.rooms[i][j - 1] = Room(self.game, rng)
+                                
                             self.done = False
                         
                         if 'E' in room.doors and self.rooms[i][j + 1] == None:
@@ -182,9 +201,16 @@ class Dungeon():
                                  self.rooms[i][j + 1] = Room(self.game, 'W')
                             else:
                                 rng = choice(st.ROOMS['E'])
-                                for rm in self.room_pool:
-                                    if fn.compare(rng, rm.doors):
-                                        self.rooms[i][j + 1] = rm
+                                
+                                if 'N' in rng and self.rooms[i - 1][j + 1]:
+                                    rng = rng.replace('N', '')
+                                if 'E' in rng and self.rooms[i][j + 2]: 
+                                    rng = rng.replace('E', '')
+                                if 'S' in rng and self.rooms[i + 1][j + 1]: 
+                                    rng = rng.replace('S', '')
+                                
+                                self.rooms[i][j + 1] = Room(self.game, rng)
+                                
                             self.done = False                              
                         
                         if 'S' in room.doors and self.rooms[i + 1][j] == None:
@@ -193,55 +219,33 @@ class Dungeon():
                                 self.rooms[i + 1][j] = Room(self.game, 'N')
                             else:
                                 rng = choice(st.ROOMS['S'])
-                                for rm in self.room_pool:
-                                    if fn.compare(rng, rm.doors):
-                                        self.rooms[i + 1][j] = rm
-                            self.done = False 
-  
-    
-    def checkDoors(self):
-        for i in range(1, len(self.rooms) - 1):
-            for j in range(1, len(self.rooms[i]) - 1):
-                room = self.rooms[i][j]
-                room_n = self.rooms[i - 1][j]
-                room_s = self.rooms[i + 1][j]
-                room_w = self.rooms[i][j - 1]
-                room_e = self.rooms[i][j + 1]
-                
-                if room:
-                    print(j, i, room.doors)
-                    for door in room.doors:  
-                        if door == 'N' and room_n:
-                            if 'S' in room_n.doors:
-                                room_n.doors = room_n.doors.replace('S', '')
-                                room.doors = room.doors.replace('N', '')
-                        if door == 'S' and room_s:
-                            if 'N' in room_s.doors:
-                                room_s.doors = room_s.doors.replace('N', '')
-                                room.doors = room.doors.replace('S', '')
                                 
-                        if door == 'E' and room_e:
-                            if 'W' in room_e.doors:
-                                room_e.doors = room_e.doors.replace('E', '')
-                                room.doors = room.doors.replace('W', '')
+                                if 'W' in rng and self.rooms[i + 1][j - 1]:
+                                    rng = rng.replace('W', '')
+                                if 'E' in rng and self.rooms[i + 1][j + 1]: 
+                                    rng = rng.replace('E', '')
+                                if 'S' in rng and self.rooms[i + 2][j]: 
+                                    rng = rng.replace('S', '')
                                 
-                        if door == 'W' and room_w:
-                            if 'E' in room_w.doors:
-                                room_w.doors = room_w.doors.replace('E', '')
-                                room.doors = room.doors.replace('W', '')
-                    print(j, i, room.doors)
-                    room.tileRoom()
-                            
+                                self.rooms[i + 1][j] = Room(self.game, rng)
+                                
+                            self.done = False
+
+                        room.buildInterior()
+                    
+      
     
+        
 
     def blitRooms(self):
         # blit a map image onto the screen
-        scale = (4 * st.GLOBAL_SCALE, 4 * st.GLOBAL_SCALE)
+        size = 3.5
+        scale = (int(size * st.GLOBAL_SCALE), int(size * st.GLOBAL_SCALE))
         
         w = self.size[0] * scale[0]
         h = self.size[1] * scale[1]
-        self.map_img = pg.Surface((w, h), flags=pg.SRCALPHA)
-        self.map_img.fill((0, 0, 0, 100))
+
+        self.map_img = pg.Surface((w, h))
              
         for i in range(len(self.rooms)):
             for j in range(len(self.rooms[i])):
@@ -263,5 +267,7 @@ class Dungeon():
         # red square representing the player
         self.map_img.blit(pg.transform.scale(self.game.room_images[11], scale), 
                                              pos2)
+        self.map_img.set_alpha(150)
         self.game.screen.blit(self.map_img, (0, 0))
+        
         
