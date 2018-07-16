@@ -8,6 +8,7 @@ import sprites as spr
 import functions as fn
 import rooms
 
+vec = pg.math.Vector2
 
 class Game():
     def __init__(self):
@@ -20,6 +21,10 @@ class Game():
         pg.display.set_caption(st.TITLE)
         self.clock = pg.time.Clock()
         self.running = True
+        
+        # boolean for room transitions (prevent player from moving if True)
+        self.in_transition = False
+        
         self.load_data()
 
 
@@ -48,8 +53,9 @@ class Game():
                 'NSW': self.room_images[16]
                 }
         
-        self.tileset_names = ['tileset.png', 'tileset_sand.png', 
-                              'tileset_green.png','tileset_red.png']
+        #self.tileset_names = ['tileset.png', 'tileset_sand.png', 
+                              #'tileset_green.png','tileset_red.png']
+        self.tileset_names = ['tileset.png']
         
         self.tileset_list = [fn.tileImageScale(path.join(img_folder, 
                              tileset), 16, 16, 
@@ -95,19 +101,18 @@ class Game():
 
     def update(self):
         index = self.dungeon.room_index
+        pg.display.set_caption(str(index) + ' ' + str(
+                                self.dungeon.rooms[index[0]][index[1]].doors))
         
         # game loop update
         self.player.update(self.walls)
         #check for room transitions on screen exit (every frame)
-        new_room, new_pos = fn.screenWrap(self.player, self.dungeon)
+        direction, new_room, new_pos = fn.screenWrap(self.player, 
+                                                     self.dungeon)
+        
         if new_room != self.room_number: 
             self.room_number = new_room
-            #build the new room
-            fn.tileRoom(self, self.tileset, self.dungeon.room_index)
-            self.background = fn.tileRoom(self, self.tileset, self.dungeon.room_index)
-            self.walls = fn.transitRoom(self, self.walls, 
-                                        self.dungeon, self.room_number)
-            self.player.rect.topleft = new_pos
+            self.RoomTransition(new_pos, direction)
 
 
     def events(self):
@@ -130,9 +135,58 @@ class Game():
         self.player.draw()
         #for wall in self.walls:
             #wall.draw()
-        self.dungeon.blitRooms()
+        if self.dungeon.done:
+            self.dungeon.blitRooms()
+                
         pg.display.flip()
-
+        
+    
+    def RoomTransition(self, new_pos, direction):
+        # build the new room
+        fn.tileRoom(self, self.tileset, self.dungeon.room_index)
+        old_background = self.background
+        self.background = fn.tileRoom(self, self.tileset, 
+                                      self.dungeon.room_index)
+        
+        # scroll the new and old brackground 
+        start_positions = {
+                          'UP': vec(0, - st.HEIGHT),  
+                          'DOWN': vec(0, st.HEIGHT),
+                          'LEFT': vec(- st.WIDTH, 0),
+                          'RIGHT': vec(st.WIDTH, 0)
+                          }
+        
+        pos = start_positions[direction]
+        pos2 = vec(0, 0)
+       
+        self.in_transition = True
+        
+        while pos != (0, 0):
+            scroll_speed = 5
+            if direction == 'UP':
+                pos[1] += scroll_speed
+                pos2[1] += scroll_speed
+            elif direction == 'DOWN':
+                pos[1] -= scroll_speed
+                pos2[1] -= scroll_speed
+            elif direction == 'LEFT':
+                pos[0] += scroll_speed
+                pos2[0] += scroll_speed
+            elif direction == 'RIGHT':
+                pos[0] -= scroll_speed
+                pos2[0] -= scroll_speed
+            
+            self.screen.blit(self.background, pos)
+            self.screen.blit(old_background, pos2)
+            self.dungeon.blitRooms()
+            self.player.draw()
+            pg.display.flip()
+        
+        self.walls = fn.transitRoom(self, self.walls, self.dungeon, 
+                                    self.room_number)
+        self.player.rect.topleft = new_pos
+        
+        self.in_transition = False
 
 
 
