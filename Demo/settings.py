@@ -15,7 +15,7 @@ MU_VOL = 0.3
 # game properties
 DUNGEON_SIZE = (16, 16)
 # animation delay in milliseconds
-DELAY = 10
+DELAY = 200
 
 # possible rooms for picking
 ROOMS = {

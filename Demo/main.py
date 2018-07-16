@@ -43,7 +43,8 @@ class Game():
                 'NWE': self.room_images[13],
                 'SWE': self.room_images[14],
                 'NSE': self.room_images[15],
-                'NSW': self.room_images[16]
+                'NSW': self.room_images[16],
+                '': self.room_images[11]
                 }
 
     def new(self):
