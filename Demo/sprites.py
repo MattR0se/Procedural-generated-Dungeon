@@ -127,8 +127,6 @@ class Dungeon(pg.sprite.Sprite):
     def update(self):
         if self.clock.checkTime() and not self.done:
             self.build_cycle()
-            #self.closeDoors()
-            #self.openDoors()
             if self.done:
                 print('done')
                 
@@ -226,93 +224,8 @@ class Dungeon(pg.sprite.Sprite):
                                     self.rooms[i + 1][j] = rm
                         self.done = False
                         return
-       
-        
-    def closeDoors(self):
-        for i in range(1, len(self.rooms) - 1):
-            for j in range(1, len(self.rooms[i]) - 1):
-                room = self.rooms[i][j]
-                room_n = self.rooms[i - 1][j]
-                room_s = self.rooms[i + 1][j]
-                room_w = self.rooms[i][j - 1]
-                room_e = self.rooms[i][j + 1]
-                
-                if room:
+
                     
-                    for door in room.doors:  
-                        
-                        if door == 'N' and room_n: 
-                            if 'S' not in room_n.doors:
-                                print('N:', (j, i), room.doors, (j, i - 1), 
-                                      room_n.doors)
-                                room.doors = room.doors.replace('N', '')
-                                room.setImage()
-                        
-                        if door == 'S' and room_s:
-                            if 'N' not in room_s.doors:
-                                print('S:', (j, i), room.doors, (j, i + 1), 
-                                      room_s.doors)
-                                room.doors = room.doors.replace('S', '')
-                                room.setImage()  
-                        
-                        if door == 'W' and room_w:
-                            if 'E' not in room_w.doors:
-                                print('W:', (j, i), room.doors, (j - 1, i), 
-                                      room_w.doors)
-                                room.doors = room.doors.replace('W', '')
-                                room.setImage()  
-                                
-                        if door == 'E' and room_e:
-                            if 'W' not in room_e.doors:
-                                print('E:', (j, i), room.doors, (j + 1, i), 
-                                      room_e.doors)
-                                room.doors = room.doors.replace('E', '')
-                                room.setImage() 
-                                
-                                
-    def openDoors(self):
-        for i in range(1, len(self.rooms) - 1):
-            for j in range(1, len(self.rooms[i]) - 1):
-                room = self.rooms[i][j]
-                room_n = self.rooms[i - 1][j]
-                room_s = self.rooms[i + 1][j]
-                room_w = self.rooms[i][j - 1]
-                room_e = self.rooms[i][j + 1]
-                
-                if room:
-                    
-                    for door in room.doors:  
-                        '''
-                        if door == 'N' and room_n: 
-                            if 'S' not in room_n.doors:
-                                print('N:', (j, i), room.doors, (j, i - 1), 
-                                      room_n.doors)
-                                room_n.doors += 'S'
-                                room_n.setImage()
-                        '''
-                        if door == 'S' and room_s:
-                            if 'N' not in room_s.doors:
-                                print('S:', (j, i), room.doors, (j, i + 1), 
-                                      room_s.doors)
-                                room_s.doors += 'N'
-                                room_s.setImage()  
-                        '''
-                        if door == 'W' and room_w:
-                            if 'E' not in room_w.doors:
-                                print('W:', (j, i), room.doors, (j - 1, i), 
-                                      room_w.doors)
-                                room_w.doors += 'E'
-                                room_w.setImage()  
-                                
-                        if door == 'E' and room_e:
-                            if 'W' not in room_e.doors:
-                                print('E:', (j, i), room.doors, (j + 1, i), 
-                                      room_e.doors)
-                                room_e.doors += 'W'
-                                room_e.setImage()'''
-        
-        
-        
     def draw_text(self, text, size, color, pos):
         font = pg.font.Font(self.font_name, size)
         text_surface = font.render(text, True, color)
