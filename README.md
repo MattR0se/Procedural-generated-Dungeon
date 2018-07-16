@@ -6,9 +6,9 @@ My goal was to put some evenly sized rooms into a fixed 2D grid, and they should
 
 I made two videos to show how this code looks right now. The first is a visualisation of the actual dungeon generation, the second one is the rudimentary "game" that puts some crudely drawn tiles in each room and lets you (the blue square) traverse the dungeon. Oh, and it also has a mini map, which is pretty much the same as the first example, only scaled to be in the corner of the screen.
 
-https://youtu.be/-qDMl8qPB0I
+https://youtu.be/rGIoYSnXh-w
 
-https://youtu.be/cOoYRCCjxXI
+https://youtu.be/TvQE_tyT9_8
 
 Also, here are the codes, one for the visualisation example and one for the game:
 
