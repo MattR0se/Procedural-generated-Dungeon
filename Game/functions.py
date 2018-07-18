@@ -1,33 +1,43 @@
 import pygame as pg
-import numpy as np
 from os import path
 import traceback
 
 import settings as st
 import sprites as spr
 
+vec = pg.math.Vector2
 
-def collideMove(self, others):
-    #move horizontally based on direction and speed
-    self.rect.x += self.dir[0] * self.vel
-    block_hit_list = pg.sprite.spritecollide(self, others, False)
-    for block in block_hit_list:
-        #if we hit something, reset our position so both hitboxes 
-        #touch on either side
-        if self.dir[0] == 1:
-            self.rect.right = block.rect.left
-        else:
-            self.rect.left = block.rect.right
-    #move vertically based on direction and speed
-    self.rect.y += self.dir[1] * self.vel
-    block_hit_list = pg.sprite.spritecollide(self, others, False)
-    for block in block_hit_list:
-        #if we hit something, reset our position so both hitboxes 
-        #touch on the top/bottom
-        if self.dir[1] == 1:
-            self.rect.bottom = block.rect.top
-        else:
-            self.rect.top = block.rect.bottom
+
+def collide_hit_rect(one, two):
+    return one.hit_rect.colliderect(two.rect)
+
+
+def collide_with_walls(sprite, group, dir_):
+    if dir_ == 'x':
+        hits = pg.sprite.spritecollide(sprite, group, False, collide_hit_rect)
+        if hits:
+            # hit from left
+            if hits[0].rect.centerx > sprite.hit_rect.centerx:
+                sprite.pos.x = hits[0].rect.left - sprite.hit_rect.w / 2
+            # hit from right
+            elif hits[0].rect.centerx < sprite.hit_rect.centerx:
+                sprite.pos.x = hits[0].rect.right + sprite.hit_rect.w / 2
+                            
+            sprite.vel.x = 0
+            sprite.hit_rect.centerx = sprite.pos.x
+            
+    elif dir_ == 'y':
+        hits = pg.sprite.spritecollide(sprite, group, False, collide_hit_rect)
+        if hits:
+            # hit from top
+            if hits[0].rect.centery > sprite.hit_rect.centery:
+                sprite.pos.y = hits[0].rect.top - sprite.hit_rect.h / 2
+            # hit from bottom
+            elif hits[0].rect.centery < sprite.hit_rect.centery:
+                sprite.pos.y = hits[0].rect.bottom + sprite.hit_rect.h / 2
+                
+            sprite.vel.y = 0
+            sprite.hit_rect.centery = sprite.pos.y
 
 
 def screenWrap(player, dungeon):
@@ -35,22 +45,22 @@ def screenWrap(player, dungeon):
     #if they do, set their new position based on where they went
     index = dungeon.room_index
     direction = ''
-    new_pos = np.copy(player.rect.topleft)
-    if player.rect.right < 0:
+    new_pos = vec(player.hit_rect.center)
+    if player.rect.left < 0:
         direction = 'LEFT'
-        new_pos[0]  = st.WIDTH - player.bb_width
+        new_pos.x  = st.WIDTH - player.rect.width
         index[1] -= 1
-    if player.rect.left > st.WIDTH:
+    if player.rect.right > st.WIDTH:
         direction = 'RIGHT'
-        new_pos[0] = 0
+        new_pos.x = player.rect.width
         index[1] += 1
-    if player.rect.bottom < 0:
+    if player.rect.top < 0:
         direction = 'UP'
-        new_pos[1] = st.HEIGHT - player.bb_height
+        new_pos.y = st.HEIGHT - player.rect.height
         index[0] -= 1
-    if player.rect.top > st.HEIGHT:
+    if player.rect.bottom > st.HEIGHT:
         direction = 'DOWN'
-        new_pos[1] = 0
+        new_pos.y = player.rect.height
         index[0] += 1
     try:
         return direction, dungeon.room_map[index[0]][index[1]], new_pos
@@ -86,7 +96,8 @@ def transitRoom(game, group, dungeon, room_number):
 
 def img_list_from_strip(filename, width, height, startpos, number):
     directory = path.dirname(__file__)
-    file = path.join(directory, filename)
+    img_folder = path.join(directory, 'images')
+    file = path.join(img_folder, filename)
     try:
         img = pg.image.load(file).convert_alpha()
     except Exception:
@@ -104,7 +115,8 @@ def img_list_from_strip(filename, width, height, startpos, number):
 def tileImageScale(filename, size_w=st.TILESIZE, size_h=st.TILESIZE, scale=1, 
                    alpha=False):
     directory = path.dirname(__file__)
-    file = path.join(directory, filename)
+    img_folder = path.join(directory, 'images')
+    file = path.join(img_folder, filename)
     try:
         img = pg.image.load(file).convert()
         if alpha:
@@ -143,14 +155,23 @@ def tileRoom(game, tileset, index):
     return image
 
 
-def compare(seq, string):
-    # checks if string contains exactly the letters in seq, but the order 
-    # is not relevant
-    if len(seq) != len(string):
+def compare(str1, str2):
+    # checks if two strings contain the same letters, but in any order
+    if len(str1) != len(str2):
         return False
-
-    for s in string:
-        #print(s)
-        if s not in seq:
+    
+    str_temp1 = str1
+    str_temp2 = str2
+    for s in str1:
+        if s not in str_temp2:
             return False
+        else:
+           str_temp2 = str_temp2.replace(s, '', 1)
+
+    for s in str2:
+        if s not in str_temp1:
+            return False
+        else:
+           str_temp1 = str_temp1.replace(s, '', 1)
+           
     return True
