@@ -1,5 +1,6 @@
 import pygame as pg
 from random import choice, randint
+from datetime import datetime
 
 import settings as st
 import functions as fn
@@ -15,6 +16,10 @@ class Room():
         self.w = st.WIDTH // st.TILESIZE
         self.h = st.HEIGHT // st.TILESIZE
         
+        self.build()
+   
+     
+    def build(self):       
         for key in self.game.room_image_dict:
             if fn.compare(self.doors, key):
                 self.image = self.game.room_image_dict[key]
@@ -24,10 +29,6 @@ class Room():
         
         
     def tileRoom(self):
-        
-        for key in self.game.room_image_dict:
-            if fn.compare(self.doors, key):
-                self.image = self.game.room_image_dict[key]
         
         # positions of the doors
         door_w = self.w // 2
@@ -73,8 +74,6 @@ class Room():
                     else:
                         self.layout[i].append(0)
                         self.tiles[i].append(0)
-                    
-        #self.buildInterior()
        
         # north
         if 'N' in self.doors:
@@ -117,7 +116,7 @@ class Room():
         door_w = self.w // 2
         door_h = self.h // 2
         # floor tile index
-        floor = 40
+        floor = 4
         for i in range(1, h):
             for j in range(1, w):
                 if randint(0, 100) <= 10 and (
@@ -127,14 +126,17 @@ class Room():
                 else:
                     self.layout[i][j] = 0  
                     self.tiles[i][j] = floor
-
-        
-
+                    
+                    
 
 class Dungeon():
     def __init__(self, game, size):
+        start = datetime.now()
         self.size = vec(size)
         self.game = game
+        # variables for animation
+        self.last_update = 0
+        self.current_frame = 0
                   
         w = int(self.size.x)
         h = int(self.size.y)
@@ -148,8 +150,9 @@ class Dungeon():
         self.done = False
         
         self.build()
-        print('done')
-        #self.checkDoors()
+        dt = datetime.now() - start
+        ms = dt.seconds * 1000 + dt.microseconds / 1000.0
+        print('Dungeon built in {} ms'.format(round(ms, 1)))
         
         
     def build(self):  
@@ -231,16 +234,41 @@ class Dungeon():
                                 
                             self.done = False
 
-                        room.buildInterior()
-                    
-      
+        self.closeDoors()
+
     
-        
+    
+    def closeDoors(self):
+        for i in range(1, len(self.rooms) - 1):
+            for j in range(1, len(self.rooms[i]) - 1):
+                room = self.rooms[i][j]
+                if room:
+                    if 'N' in room.doors and self.rooms[i - 1][j]:
+                        if 'S' not in self.rooms[i - 1][j].doors:
+                            room.doors = room.doors.replace('N', '')
+  
+                    if 'S' in room.doors and self.rooms[i + 1][j]:
+                        if 'N' not in self.rooms[i + 1][j].doors:
+                            room.doors = room.doors.replace('S', '')
+                    
+                    if 'W' in room.doors and self.rooms[i][j - 1]:
+                        if 'E' not in self.rooms[i][j - 1].doors:
+                            room.doors = room.doors.replace('W', '')
+                            
+                    if 'E' in room.doors and self.rooms[i][j + 1]:
+                        if 'W' not in self.rooms[i][j + 1].doors:
+                            room.doors = room.doors.replace('E', '')
+                    
+                    # re-build the rooms after changes
+                    room.build()
+                    # set the inner layout of the room
+                    room.buildInterior()
+
 
     def blitRooms(self):
-        # blit a map image onto the screen
+        # blit a mini-map image onto the screen
         size = 3.5
-        scale = (int(size * st.GLOBAL_SCALE), int(size * st.GLOBAL_SCALE))
+        scale = (int(size * st.GLOBAL_SCALE), int(size * st.GLOBAL_SCALE / 2))
         
         w = self.size[0] * scale[0]
         h = self.size[1] * scale[1]
@@ -261,12 +289,20 @@ class Dungeon():
                 else:
                     self.map_img.blit(pg.transform.scale(
                             self.game.room_images[17], scale), pos)
-                    
+         
+        # animated red square representing the player
+        now = pg.time.get_ticks()
         pos2 = (self.room_index[1] * (w / self.size[0]), 
                                self.room_index[0] * (h / self.size[1]))
-        # red square representing the player
-        self.map_img.blit(pg.transform.scale(self.game.room_images[11], scale), 
-                                             pos2)
+        player_imgs = [pg.transform.scale(self.game.room_images[11], scale),
+                       pg.transform.scale(self.game.room_images[17], scale)]
+        
+        if now - self.last_update > 500:
+                self.last_update = now
+                # change the image
+                self.current_frame = (self.current_frame + 1) % len(player_imgs)
+        self.map_img.blit(player_imgs[self.current_frame], pos2)
+                
         self.map_img.set_alpha(150)
         self.game.screen.blit(self.map_img, (0, 0))
         
