@@ -97,8 +97,9 @@ class Game():
 
 
     def update(self):
-        #pg.display.set_caption(str(self.player.hit_rect.center))
-        pg.display.set_caption(st.TITLE)
+        index = self.dungeon.room_index
+        pg.display.set_caption(str(index) + '  ' + str(self.dungeon.rooms[index[0]][index[1]].dist))
+        #pg.display.set_caption(st.TITLE)
         if self.slowmotion:
             pg.display.set_caption('slowmotion')
         
