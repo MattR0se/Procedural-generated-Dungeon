@@ -87,6 +87,9 @@ def transitRoom(game, group, dungeon, room_number):
                 if data[i][j] == 1:
                     group.add(spr.Wall(game, (j * st.TILESIZE, i * st.TILESIZE), 
                                         (st.TILESIZE, st.TILESIZE)))
+                    
+        dungeon.rooms[dungeon.room_index[0]][dungeon.room_index[1]].visited = True
+        
         return group
     except Exception:
         #if something goes wrong, return an empty group

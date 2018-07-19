@@ -16,6 +16,9 @@ class Room():
         self.w = st.WIDTH // st.TILESIZE
         self.h = st.HEIGHT // st.TILESIZE
         
+        self.visited = True
+        self.dist = -1
+        
         self.build()
    
      
@@ -144,8 +147,9 @@ class Dungeon():
         self.rooms = [[None for i in range(w)] for j in range(h)]
         self.room_map = [[(j * w + i) for i in range(w)] for j in range(h)]
         # starting room
-        self.rooms[h//2][w//2] = Room(self.game, 'NSWE', 'start')
-        self.room_index = [h//2, w//2]
+        self.start = [h//2, w//2]
+        self.rooms[self.start[0]][self.start[1]] = Room(self.game, 'NSWE', 'start')
+        self.room_index = self.start
         
         self.done = False
         
@@ -235,12 +239,13 @@ class Dungeon():
                             self.done = False
 
         self.closeDoors()
+        self.floodFill()
 
     
     
     def closeDoors(self):
-        for i in range(1, len(self.rooms) - 1):
-            for j in range(1, len(self.rooms[i]) - 1):
+        for i in range(len(self.rooms)):
+            for j in range(len(self.rooms[i])):
                 room = self.rooms[i][j]
                 if room:
                     if 'N' in room.doors and self.rooms[i - 1][j]:
@@ -265,6 +270,41 @@ class Dungeon():
                     room.buildInterior()
 
 
+    def floodFill(self):
+        cycle = 0
+        starting_room = self.rooms[self.start[0]][self.start[1]]
+        starting_room.dist = 0
+        fill = True
+        while fill:
+            fill = False
+            for i in range(1, len(self.rooms) - 1):
+                for j in range(1, len(self.rooms[i]) - 1):
+                    room = self.rooms[i][j]
+                    if room and room.dist == cycle:
+                        if 'N' in room.doors and self.rooms[i - 1][j]:
+                            if self.rooms[i - 1][j].dist == -1:
+                                self.rooms[i - 1][j].dist = cycle + 1
+                                fill = True
+                            
+                        if 'S' in room.doors and self.rooms[i + 1][j]:
+                            if self.rooms[i + 1][j].dist == -1:
+                                self.rooms[i + 1][j].dist = cycle + 1
+                                fill = True
+                        
+                        if 'W' in room.doors and self.rooms[i][j - 1]:
+                            if self.rooms[i][j - 1].dist == -1:
+                                self.rooms[i][j - 1].dist = cycle + 1
+                                fill = True
+                        
+                        if 'E' in room.doors and self.rooms[i][j + 1]:
+                            if self.rooms[i][j + 1].dist == -1:
+                                self.rooms[i][j + 1].dist = cycle + 1
+                                fill = True
+                        
+            cycle += 1
+        print(cycle - 1)
+    
+
     def blitRooms(self):
         # blit a mini-map image onto the screen
         size = 3.5
@@ -279,7 +319,7 @@ class Dungeon():
             for j in range(len(self.rooms[i])):
                 room = self.rooms[i][j]
                 pos = (j * (w / self.size[0]), i * (h / self.size[1]))
-                if room:
+                if room and room.visited:
                     self.map_img.blit(pg.transform.scale(room.image,
                                       scale), pos)
                     if room.type == 'start':
