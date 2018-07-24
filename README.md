@@ -151,7 +151,8 @@ Now, the build method is where the magic happens, so to speak. There is a while 
                             self.done = False
 
         self.closeDoors()
-        self.floodFill()```
+        self.floodFill()
+```
 A little bit more in-depth: The code loops through each item in the rooms grid, except for the first and last rows and columns. Remember that there are only 'None's in the beginning, except for the starting room. So if the loop reaches this room, the 'if room:' is True because 'None' defaults to False.
 ```python
 while self.done == False:
