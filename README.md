@@ -72,82 +72,83 @@ self.build()
 ```
 Now, the build method is where the magic happens, so to speak. There is a while loop that goes through the rooms grid and checks for every room's doors and if there is empty space and if so, places a random room.
 ```python
- def build(self): 
-	 while self.done == False:
+def build(self):  
+    while self.done == False:
 		self.done = True
 		for i in range(1, len(self.rooms) - 1):
-		for j in range(1, len(self.rooms[i]) - 1):
-			room = self.rooms[i][j]
-			if room:
-			if 'N' in room.doors and self.rooms[i - 1][j] == None:
-				if i == 1:
-				self.rooms[i - 1][j] = Room(self.game, 'S')
-				else:
-				# pick random door constellation
-				rng = choice(st.ROOMS['N'])
+			for j in range(1, len(self.rooms[i]) - 1):
+				room = self.rooms[i][j]
+				if room:
+					if 'N' in room.doors and self.rooms[i - 1][j] == None:
+						if i == 1:
+							self.rooms[i - 1][j] = Room(self.game, 'S')
+						else:
+							# pick random door constellation
+							rng = choice(st.ROOMS['N'])
 
-				# prevent one-sided doors
-				if 'N' in rng and self.rooms[i - 2][j]:
-					rng = rng.replace('N', '')
-				if 'W' in rng and self.rooms[i - 1][j - 1]:
-					rng = rng.replace('W', '')
-				if 'E' in rng and self.rooms[i - 1][j + 1]: 
-					rng = rng.replace('E', '')
+							# prevent one-sided doors
+							if 'N' in rng and self.rooms[i - 2][j]:
+								rng = rng.replace('N', '')
+							if 'W' in rng and self.rooms[i - 1][j - 1]:
+								rng = rng.replace('W', '')
+							if 'E' in rng and self.rooms[i - 1][j + 1]: 
+								rng = rng.replace('E', '')
 
-				self.rooms[i - 1][j] = Room(self.game, rng)
+							self.rooms[i - 1][j] = Room(self.game, rng)
 
-				self.done = False
+						self.done = False
 
-			if 'W' in room.doors and self.rooms[i][j - 1] == None:
-				if j == 1:
-				self.rooms[i][j - 1] = Room(self.game, 'E')
-				else:
-				rng = choice(st.ROOMS['W'])
+					if 'W' in room.doors and self.rooms[i][j - 1] == None:
+						if j == 1:
+							self.rooms[i][j - 1] = Room(self.game, 'E')
+						else:
+							rng = choice(st.ROOMS['W'])
 
-				if 'N' in rng and self.rooms[i - 1][j - 1]:
-					rng = rng.replace('N', '')
-				if 'W' in rng and self.rooms[i][j - 2]: 
-					rng = rng.replace('W', '')
-				if 'S' in rng and self.rooms[i + 1][j - 1]: 
-					rng = rng.replace('S', '')
+							if 'N' in rng and self.rooms[i - 1][j - 1]:
+								rng = rng.replace('N', '')
+							if 'W' in rng and self.rooms[i][j - 2]: 
+								rng = rng.replace('W', '')
+							if 'S' in rng and self.rooms[i + 1][j - 1]: 
+								rng = rng.replace('S', '')
 
-				self.rooms[i][j - 1] = Room(self.game, rng)
+							self.rooms[i][j - 1] = Room(self.game, rng)
 
-				self.done = False
+						self.done = False
 
-			if 'E' in room.doors and self.rooms[i][j + 1] == None:
-				if j == len(self.rooms) - 2:
-				 self.rooms[i][j + 1] = Room(self.game, 'W')
-				else:
-				rng = choice(st.ROOMS['E'])
+					if 'E' in room.doors and self.rooms[i][j + 1] == None:
+						if j == len(self.rooms) - 2:
+							 self.rooms[i][j + 1] = Room(self.game, 'W')
+						else:
+							rng = choice(st.ROOMS['E'])
 
-				if 'N' in rng and self.rooms[i - 1][j + 1]:
-					rng = rng.replace('N', '')
-				if 'E' in rng and self.rooms[i][j + 2]: 
-					rng = rng.replace('E', '')
-				if 'S' in rng and self.rooms[i + 1][j + 1]: 
-					rng = rng.replace('S', '')
+							if 'N' in rng and self.rooms[i - 1][j + 1]:
+								rng = rng.replace('N', '')
+							if 'E' in rng and self.rooms[i][j + 2]: 
+								rng = rng.replace('E', '')
+							if 'S' in rng and self.rooms[i + 1][j + 1]: 
+								rng = rng.replace('S', '')
 
-				self.rooms[i][j + 1] = Room(self.game, rng)
+							self.rooms[i][j + 1] = Room(self.game, rng)
 
-				self.done = False                              
+						self.done = False                              
 
-			if 'S' in room.doors and self.rooms[i + 1][j] == None:
-				if i == len(self.rooms) - 2:
-				self.rooms[i + 1][j] = Room(self.game, 'N')
-				else:
-				rng = choice(st.ROOMS['S'])
+					if 'S' in room.doors and self.rooms[i + 1][j] == None:
+						if i == len(self.rooms) - 2:
+							pass
+							self.rooms[i + 1][j] = Room(self.game, 'N')
+						else:
+							rng = choice(st.ROOMS['S'])
 
-				if 'W' in rng and self.rooms[i + 1][j - 1]:
-					rng = rng.replace('W', '')
-				if 'E' in rng and self.rooms[i + 1][j + 1]: 
-					rng = rng.replace('E', '')
-				if 'S' in rng and self.rooms[i + 2][j]: 
-					rng = rng.replace('S', '')
+							if 'W' in rng and self.rooms[i + 1][j - 1]:
+								rng = rng.replace('W', '')
+							if 'E' in rng and self.rooms[i + 1][j + 1]: 
+								rng = rng.replace('E', '')
+							if 'S' in rng and self.rooms[i + 2][j]: 
+								rng = rng.replace('S', '')
 
-				self.rooms[i + 1][j] = Room(self.game, rng)
+							self.rooms[i + 1][j] = Room(self.game, rng)
 
-				self.done = False
+						self.done = False
 
 	self.closeDoors()
 	self.floodFill()
