@@ -48,7 +48,8 @@ class Dungeon():
         
         self.done = False
         
-        self.build()```
+        self.build()
+```
 
 Then, the starting room is created. In this example, it is a room with 4 exits and located in the middle of the grid, but it could also have any given position and number of exists. I believe this is how it's done in The Binding of Isaac, whereas in Zelda, the entrance would be at the bottom of the dungeon's grid.
 
