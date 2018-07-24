@@ -165,10 +165,10 @@ Now, there are a bunch of if-clauses that check if that room.doors has a certain
 ```python
 if 'N' in room.doors and self.rooms[i - 1][j] == None:
 	if i == 1:
-	self.rooms[i - 1][j] = Room(self.game, 'S')
-                 else:
-                  # pick random door constellation
-	 rng = choice(st.ROOMS['N'])
+		self.rooms[i - 1][j] = Room(self.game, 'S')
+	else:
+		# pick random door constellation
+		rng = choice(st.ROOMS['N'])
 ```
 Otherwise, it the Dungeon picks a room constellation randomly from a list. Now, this is the important part that defines the overall structure of your final dungeon. See that currently, for the 'N' direction there are four items 'NS' in it, three 'S' and one of each of the other possible choices. So, it is four times as likely to pick the 'NS' and three times as likely to pick 'S' than the other constellations. Here you can play with the list and see what happens. For example, if you put even more 'NS' room in there, the branches become more streched. If you have only one 'NS' in there, the rooms will somewhat clump together. If you add more 'S', the dungeon gets smaller. This is determined in the settings.py:
 ```python
