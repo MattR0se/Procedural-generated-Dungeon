@@ -73,82 +73,82 @@ self.build()
 Now, the build method is where the magic happens, so to speak. There is a while loop that goes through the rooms grid and checks for every room's doors and if there is empty space and if so, places a random room.
 ```python
  def build(self): 
- while self.done == False:
- 	self.done = True
-	for i in range(1, len(self.rooms) - 1):
-	for j in range(1, len(self.rooms[i]) - 1):
-		room = self.rooms[i][j]
-		if room:
-		if 'N' in room.doors and self.rooms[i - 1][j] == None:
-			if i == 1:
-			self.rooms[i - 1][j] = Room(self.game, 'S')
-			else:
-			# pick random door constellation
-			rng = choice(st.ROOMS['N'])
+	 while self.done == False:
+		self.done = True
+		for i in range(1, len(self.rooms) - 1):
+		for j in range(1, len(self.rooms[i]) - 1):
+			room = self.rooms[i][j]
+			if room:
+			if 'N' in room.doors and self.rooms[i - 1][j] == None:
+				if i == 1:
+				self.rooms[i - 1][j] = Room(self.game, 'S')
+				else:
+				# pick random door constellation
+				rng = choice(st.ROOMS['N'])
 
-			# prevent one-sided doors
-			if 'N' in rng and self.rooms[i - 2][j]:
-				rng = rng.replace('N', '')
-			if 'W' in rng and self.rooms[i - 1][j - 1]:
-				rng = rng.replace('W', '')
-			if 'E' in rng and self.rooms[i - 1][j + 1]: 
-				rng = rng.replace('E', '')
+				# prevent one-sided doors
+				if 'N' in rng and self.rooms[i - 2][j]:
+					rng = rng.replace('N', '')
+				if 'W' in rng and self.rooms[i - 1][j - 1]:
+					rng = rng.replace('W', '')
+				if 'E' in rng and self.rooms[i - 1][j + 1]: 
+					rng = rng.replace('E', '')
 
-			self.rooms[i - 1][j] = Room(self.game, rng)
+				self.rooms[i - 1][j] = Room(self.game, rng)
 
-			self.done = False
+				self.done = False
 
-		if 'W' in room.doors and self.rooms[i][j - 1] == None:
-			if j == 1:
-			self.rooms[i][j - 1] = Room(self.game, 'E')
-			else:
-			rng = choice(st.ROOMS['W'])
+			if 'W' in room.doors and self.rooms[i][j - 1] == None:
+				if j == 1:
+				self.rooms[i][j - 1] = Room(self.game, 'E')
+				else:
+				rng = choice(st.ROOMS['W'])
 
-			if 'N' in rng and self.rooms[i - 1][j - 1]:
-				rng = rng.replace('N', '')
-			if 'W' in rng and self.rooms[i][j - 2]: 
-				rng = rng.replace('W', '')
-			if 'S' in rng and self.rooms[i + 1][j - 1]: 
-				rng = rng.replace('S', '')
+				if 'N' in rng and self.rooms[i - 1][j - 1]:
+					rng = rng.replace('N', '')
+				if 'W' in rng and self.rooms[i][j - 2]: 
+					rng = rng.replace('W', '')
+				if 'S' in rng and self.rooms[i + 1][j - 1]: 
+					rng = rng.replace('S', '')
 
-			self.rooms[i][j - 1] = Room(self.game, rng)
+				self.rooms[i][j - 1] = Room(self.game, rng)
 
-			self.done = False
+				self.done = False
 
-		if 'E' in room.doors and self.rooms[i][j + 1] == None:
-			if j == len(self.rooms) - 2:
-			 self.rooms[i][j + 1] = Room(self.game, 'W')
-			else:
-			rng = choice(st.ROOMS['E'])
+			if 'E' in room.doors and self.rooms[i][j + 1] == None:
+				if j == len(self.rooms) - 2:
+				 self.rooms[i][j + 1] = Room(self.game, 'W')
+				else:
+				rng = choice(st.ROOMS['E'])
 
-			if 'N' in rng and self.rooms[i - 1][j + 1]:
-				rng = rng.replace('N', '')
-			if 'E' in rng and self.rooms[i][j + 2]: 
-				rng = rng.replace('E', '')
-			if 'S' in rng and self.rooms[i + 1][j + 1]: 
-				rng = rng.replace('S', '')
+				if 'N' in rng and self.rooms[i - 1][j + 1]:
+					rng = rng.replace('N', '')
+				if 'E' in rng and self.rooms[i][j + 2]: 
+					rng = rng.replace('E', '')
+				if 'S' in rng and self.rooms[i + 1][j + 1]: 
+					rng = rng.replace('S', '')
 
-			self.rooms[i][j + 1] = Room(self.game, rng)
+				self.rooms[i][j + 1] = Room(self.game, rng)
 
-			self.done = False                              
+				self.done = False                              
 
-		if 'S' in room.doors and self.rooms[i + 1][j] == None:
-			if i == len(self.rooms) - 2:
-			pass
-			self.rooms[i + 1][j] = Room(self.game, 'N')
-			else:
-			rng = choice(st.ROOMS['S'])
+			if 'S' in room.doors and self.rooms[i + 1][j] == None:
+				if i == len(self.rooms) - 2:
+				pass
+				self.rooms[i + 1][j] = Room(self.game, 'N')
+				else:
+				rng = choice(st.ROOMS['S'])
 
-			if 'W' in rng and self.rooms[i + 1][j - 1]:
-				rng = rng.replace('W', '')
-			if 'E' in rng and self.rooms[i + 1][j + 1]: 
-				rng = rng.replace('E', '')
-			if 'S' in rng and self.rooms[i + 2][j]: 
-				rng = rng.replace('S', '')
+				if 'W' in rng and self.rooms[i + 1][j - 1]:
+					rng = rng.replace('W', '')
+				if 'E' in rng and self.rooms[i + 1][j + 1]: 
+					rng = rng.replace('E', '')
+				if 'S' in rng and self.rooms[i + 2][j]: 
+					rng = rng.replace('S', '')
 
-			self.rooms[i + 1][j] = Room(self.game, rng)
+				self.rooms[i + 1][j] = Room(self.game, rng)
 
-			self.done = False
+				self.done = False
 
 	self.closeDoors()
 	self.floodFill()
@@ -203,30 +203,30 @@ Lastly, self.done is set to False after it was set to True at the beginning of t
 At the end of self.build(), two functions are called: closeDoors() and floodFill(). 
 ```python
 def closeDoors(self):
-        for i in range(len(self.rooms)):
-            for j in range(len(self.rooms[i])):
-                room = self.rooms[i][j]
-                if room:
-                    if 'N' in room.doors and self.rooms[i - 1][j]:
-                        if 'S' not in self.rooms[i - 1][j].doors:
-                            room.doors = room.doors.replace('N', '')
-  
-                    if 'S' in room.doors and self.rooms[i + 1][j]:
-                        if 'N' not in self.rooms[i + 1][j].doors:
-                            room.doors = room.doors.replace('S', '')
-                    
-                    if 'W' in room.doors and self.rooms[i][j - 1]:
-                        if 'E' not in self.rooms[i][j - 1].doors:
-                            room.doors = room.doors.replace('W', '')
-                            
-                    if 'E' in room.doors and self.rooms[i][j + 1]:
-                        if 'W' not in self.rooms[i][j + 1].doors:
-                            room.doors = room.doors.replace('E', '')
-                    
-                    # re-build the rooms after changes
-                    room.build()
-                    # set the inner layout of the room
-                    room.buildInterior()
+	for i in range(len(self.rooms)):
+		for j in range(len(self.rooms[i])):
+			room = self.rooms[i][j]
+			if room:
+				if 'N' in room.doors and self.rooms[i - 1][j]:
+					if 'S' not in self.rooms[i - 1][j].doors:
+						room.doors = room.doors.replace('N', '')
+
+				if 'S' in room.doors and self.rooms[i + 1][j]:
+					if 'N' not in self.rooms[i + 1][j].doors:
+						room.doors = room.doors.replace('S', '')
+
+				if 'W' in room.doors and self.rooms[i][j - 1]:
+					if 'E' not in self.rooms[i][j - 1].doors:
+						room.doors = room.doors.replace('W', '')
+
+				if 'E' in room.doors and self.rooms[i][j + 1]:
+					if 'W' not in self.rooms[i][j + 1].doors:
+						room.doors = room.doors.replace('E', '')
+
+				# re-build the rooms after changes
+				room.build()
+				# set the inner layout of the room
+				room.buildInterior()
 
 ```
 This loops through the grid and if a room's door has no corresponding door in the next room, deletes it from the string. Now, I imagine this could have already been done in the build() method, but this works fine and right now, I don't really care about performance since this whole process takes around 10ms on my computer (which is really old by the way). 
@@ -235,38 +235,38 @@ At the end, the room needs to be rebuild because its doors changed. More about t
 Next, I wrote a litte flood-fill alorithm, which is not used right now. What it does is that it assignes a value to each room based on how far the room is from the start. 
 ```python
 def floodFill(self):
-        cycle = 0
-        starting_room = self.rooms[self.start[0]][self.start[1]]
-        starting_room.dist = 0
-        done = False
-        while not done:
-            done = True
-            for i in range(1, len(self.rooms) - 1):
-                for j in range(1, len(self.rooms[i]) - 1):
-                    room = self.rooms[i][j]
-                    
-                    if room and room.dist == cycle:
-                        if 'N' in room.doors and self.rooms[i - 1][j]:
-                            if self.rooms[i - 1][j].dist == -1:
-                                self.rooms[i - 1][j].dist = cycle + 1
-                                done = False
-                            
-                        if 'S' in room.doors and self.rooms[i + 1][j]:
-                            if self.rooms[i + 1][j].dist == -1:
-                                self.rooms[i + 1][j].dist = cycle + 1
-                                done = False
-                        
-                        if 'W' in room.doors and self.rooms[i][j - 1]:
-                            if self.rooms[i][j - 1].dist == -1:
-                                self.rooms[i][j - 1].dist = cycle + 1
-                                done = False
-                        
-                        if 'E' in room.doors and self.rooms[i][j + 1]:
-                            if self.rooms[i][j + 1].dist == -1:
-                                self.rooms[i][j + 1].dist = cycle + 1
-                                done = False
-                        
-            cycle += 1
+	cycle = 0
+	starting_room = self.rooms[self.start[0]][self.start[1]]
+	starting_room.dist = 0
+	done = False
+	while not done:
+		done = True
+		for i in range(1, len(self.rooms) - 1):
+			for j in range(1, len(self.rooms[i]) - 1):
+				room = self.rooms[i][j]
+
+				if room and room.dist == cycle:
+					if 'N' in room.doors and self.rooms[i - 1][j]:
+						if self.rooms[i - 1][j].dist == -1:
+							self.rooms[i - 1][j].dist = cycle + 1
+							done = False
+
+					if 'S' in room.doors and self.rooms[i + 1][j]:
+						if self.rooms[i + 1][j].dist == -1:
+							self.rooms[i + 1][j].dist = cycle + 1
+							done = False
+
+					if 'W' in room.doors and self.rooms[i][j - 1]:
+						if self.rooms[i][j - 1].dist == -1:
+							self.rooms[i][j - 1].dist = cycle + 1
+							done = False
+
+					if 'E' in room.doors and self.rooms[i][j + 1]:
+						if self.rooms[i][j + 1].dist == -1:
+							self.rooms[i][j + 1].dist = cycle + 1
+							done = False
+
+		cycle += 1
 ```
 Each room starts with dist == -1 when it is instantiated. First, the starting room gets the value of 0. Then, this code loops through each room and looks for the rooms with a dist equal to the current cycle. In the first iteration, this is 0, so it finds the starting room and assigns each adjacent room a 1. In the next iteration, it finds all the rooms with dist == 1 and assigns a 2 if they have a -1, aka not been visited yet. This repeats until no room gets assigned a new dist. 
 This can be useful to asses a Dungeon's structure, for example if you want the max dist from the start a certain value. I will also use this to assign the boss room and also look where the player can and can't go if there are locked doors. 
