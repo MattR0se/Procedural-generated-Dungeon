@@ -134,7 +134,6 @@ Now, the build method is where the magic happens, so to speak. There is a while 
 
 			if 'S' in room.doors and self.rooms[i + 1][j] == None:
 				if i == len(self.rooms) - 2:
-				pass
 				self.rooms[i + 1][j] = Room(self.game, 'N')
 				else:
 				rng = choice(st.ROOMS['S'])
